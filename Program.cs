@@ -1,9 +1,5 @@
 // Asset tracking system
 
-using System.Diagnostics.Contracts;
-using System.Net.Mail;
-using System.Reflection.Metadata;
-
 List<Asset> assets = new List<Asset>();
 
 while (true)
