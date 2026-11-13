@@ -107,8 +107,9 @@ void AddAssets()
     Console.WriteLine("Press Enter without a value to restart at Asset Type.");
     while (true)
     {
-        Console.Write("Enter Asset Type (1 for Laptop, 2 for Mobile Phone): ");
+        Console.Write("Enter Asset Type (1: Computer, 2: Mobile): ");
         String assetType = Console.ReadLine();
+        String subAssetType = ""; 
         if (assetType == String.Empty)
         {
             continue;
@@ -121,6 +122,52 @@ void AddAssets()
         {
             Console.WriteLine("ERROR: Invalid Asset Type");
             continue;
+        }
+
+        if (assetType == "1")
+        {
+            while (true)
+            {
+                Console.Write("Enter Computer Type (1: Laptop, 2: Desktop): ");
+                subAssetType = Console.ReadLine();
+                if (subAssetType == String.Empty)
+                {
+                    continue;
+                }
+                if (subAssetType.ToLower().Trim() == "back")
+                {
+                    break;
+                }
+                if (subAssetType != "1" && subAssetType != "2")
+                {
+                    Console.WriteLine("ERROR: Invalid Computer Type");
+                    continue;
+                }
+                break; 
+            }
+            
+        } else if (assetType == "2")
+        {
+            while (true)
+            {
+                Console.Write("Enter Mobile Type (1: Phone, 2: Tablet): ");
+                subAssetType = Console.ReadLine();
+                if (subAssetType == String.Empty)
+                {
+                    continue;
+                }
+                if (subAssetType.ToLower().Trim() == "back")
+                {
+                    break;
+                }
+                if (subAssetType != "1" && subAssetType != "2")
+                {
+                    Console.WriteLine("ERROR: Invalid Mobile Type");
+                    continue;
+                }
+                break;
+            }
+            
         }
 
         Console.Write("Enter Brand: ");
@@ -196,12 +243,26 @@ void AddAssets()
         Asset asset; 
         if (assetType == "1")
         {
-            asset = new Laptop(brand, model, purchaseDate, priceUSD, office);            
+            if (subAssetType == "1")
+            {
+                asset = new Computer(brand, model, purchaseDate, priceUSD, office, ComputerAsset.Laptop);
+            } else 
+            {
+                asset = new Computer(brand, model, purchaseDate, priceUSD, office, ComputerAsset.Desktop);
+            }
+                       
         } else
         {
-            asset = new MobilePhone(brand, model, purchaseDate, priceUSD, office); 
+             if (subAssetType == "1")
+            {
+                asset = new Mobile(brand, model, purchaseDate, priceUSD, office, MobileAsset.Phone);
+            } else 
+            {
+                asset = new Mobile(brand, model, purchaseDate, priceUSD, office, MobileAsset.Tablet);
+            }
         }
-        assets.Add(asset);
+        assets.Add(asset); 
+        
         Console.WriteLine("Asset added successfully!\n");
     }
 }
@@ -248,97 +309,6 @@ void ShowAssets(List<Asset> list)
     }
 }
 
-abstract class Asset {
-    private static int id = 0; 
-    public int ID { get; }
-    public String Brand { get; set; }
-    public String Model { get; set; }
-    public DateTime PurchaseDate { get; set; }
-    private double _priceUSD; 
-    public double PriceUSD { 
-        get
-        {
-            return _priceUSD;     
-        } 
-        set
-        {
-            _priceUSD = value; 
-            if (Office == Office.Sweden)
-            {
-                Currency = "SEK"; 
-                PriceLocal = _priceUSD * 9.83; 
-            }  
-            else if (Office == Office.Turkey)
-            {
-                Currency = "TRY"; 
-                PriceLocal = _priceUSD * 48.77; 
-            }
-            else
-            {
-                Currency = "USD"; 
-                PriceLocal = _priceUSD; 
-            }
-        } }
-    public double PriceLocal {get; set; }
 
-    public String Currency { get; set; }
-    public Office Office { get; set; }
-
-    public DateTime EndOfLife()
-    {
-        return PurchaseDate.AddYears(3);
-    }
-
-    public TimeSpan AssetAge()
-    {
-        return DateTime.Today - PurchaseDate; 
-    }
-
-    public Asset (String brand, String model, DateTime purchaseDate, double priceUSD, Office office)
-    {
-        Brand = brand;
-        Model = model;
-        PurchaseDate = purchaseDate;
-        Office = office;
-        PriceUSD = priceUSD;
-        ID = id; 
-        id++; 
-    }
-
-    public abstract String DisplayType(); 
-
-}
-
-enum Office
-{
-    Sweden,
-    USA, 
-    Turkey
-}
-
-class Laptop : Asset
-{
-    public Laptop(String brand, String model, DateTime purchaseDate, double priceUSD, Office office)
-        : base(brand, model, purchaseDate, priceUSD, office){}
-
-    public override String DisplayType()
-    {
-        return "Laptop"; 
-    }
-
-
-}
-
-class MobilePhone : Asset 
-{
-    public MobilePhone(String brand, String model, DateTime purchaseDate, double priceUSD, Office office)
-        : base(brand, model, purchaseDate, priceUSD, office){}
-
-    public override string DisplayType()
-    {
-        return "Phone"; 
-    }
-
-}
 
 

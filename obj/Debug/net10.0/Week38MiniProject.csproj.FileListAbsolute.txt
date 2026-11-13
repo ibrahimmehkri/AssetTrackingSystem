@@ -17,3 +17,4 @@ C:\Users\mehkr\Documents\Programming\C-sharp-projects\Week38MiniProject\bin\Veri
 C:\Users\mehkr\Documents\Programming\C-sharp-projects\Week38MiniProject\bin\Verification\Week38MiniProject.runtimeconfig.json
 C:\Users\mehkr\Documents\Programming\C-sharp-projects\Week38MiniProject\bin\Verification\Week38MiniProject.dll
 C:\Users\mehkr\Documents\Programming\C-sharp-projects\Week38MiniProject\bin\Verification\Week38MiniProject.pdb
+C:\Users\mehkr\Documents\Programming\C-sharp-projects\Week38MiniProject\obj\Debug\net10.0\Week38MiniProject.sourcelink.json
