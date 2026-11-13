@@ -1,6 +1,5 @@
 // Asset tracking system
-
-List<Asset> assets = new List<Asset>();
+using System.ComponentModel.Design.Serialization;
 
 while (true)
 {
@@ -20,7 +19,11 @@ while (true)
     }
     else if (choice == "2")
     {
-        ShowAssets(assets);
+        using (var context = new AppDbContext())
+        {
+            List<Asset> assets = context.Assets.ToList(); 
+            ShowAssets(assets);    
+        }
     }
     else if (choice == "3")
     {
@@ -39,7 +42,11 @@ while (true)
 void RemoveAsset()
 {
     Console.WriteLine("Type 'back' to go back to the menu.\nUse ID from the list to remove an asset.\n");
-    ShowAssets(assets);  
+    using (var context = new AppDbContext())
+    {
+        List<Asset> assets = context.Assets.ToList(); 
+        ShowAssets(assets);   
+    }  
     while (true)
     {
         
@@ -57,20 +64,24 @@ void RemoveAsset()
             continue; 
         }
 
-        Asset? asset = assets.FirstOrDefault(delegate (Asset asset)
+        using (var context = new AppDbContext())
         {
-            return asset.ID == number; 
-        }); 
+            Asset? asset = context.Assets.FirstOrDefault(delegate (Asset asset)
+            {
+                return asset.ID == number; 
+            }); 
 
-        if (asset == null)
-        {
-            Console.WriteLine("No such asset found"); 
-            continue; 
-        } 
-        
-            assets.Remove(asset); 
+            if (asset == null)
+            {
+                Console.WriteLine("No such asset found"); 
+                continue; 
+            } 
+            
+            context.Assets.Remove(asset);
+            context.SaveChanges();  
             Console.WriteLine("Asset removed from the list"); 
-            ShowAssets(assets); 
+            ShowAssets(context.Assets.ToList()); 
+        }
     }
 }
 
@@ -91,13 +102,15 @@ void SearchAssets()
 
         enteredValue = enteredValue.ToLower().Trim(); 
 
-        List<Asset> matches =  assets.Where(delegate(Asset asset)
+        using (var context = new AppDbContext())
         {
-            return asset.Brand.Contains(enteredValue, StringComparison.OrdinalIgnoreCase) || asset.Model.Contains(enteredValue, StringComparison.OrdinalIgnoreCase); 
-        }).ToList(); 
+            List<Asset> matches =  context.Assets.Where(delegate(Asset asset)
+            {
+                return asset.Brand.Contains(enteredValue, StringComparison.OrdinalIgnoreCase) || asset.Model.Contains(enteredValue, StringComparison.OrdinalIgnoreCase); 
+            }).ToList(); 
 
-        ShowAssets(matches); 
-
+            ShowAssets(matches); 
+        }
     }
 }
 
@@ -261,9 +274,14 @@ void AddAssets()
                 asset = new Mobile(brand, model, purchaseDate, priceUSD, office, MobileAsset.Tablet);
             }
         }
-        assets.Add(asset); 
         
-        Console.WriteLine("Asset added successfully!\n");
+        using (var context = new AppDbContext())
+        {
+            context.Assets.Add(asset); 
+            context.SaveChanges(); 
+        }
+        
+        Console.WriteLine($"Asset ID {asset.ID} was added successfully!\n");
     }
 }
 
@@ -276,9 +294,9 @@ void ShowAssets(List<Asset> list)
         return;
     }
 
-    Console.WriteLine("---------------------------------------------------------------------------------------"); 
+    Console.WriteLine("------------------------------------------------------------------------------------------"); 
     Console.WriteLine("ID".PadRight(6) + "Office".PadRight(12) + "Type".PadRight(12) + "Brand".PadRight(12) + "Model".PadRight(12) + "Purchase Date".PadRight(16) + "Price".PadRight(12) + "Status");
-    Console.WriteLine("---------------------------------------------------------------------------------------");
+    Console.WriteLine("------------------------------------------------------------------------------------------");
 
     List<Asset> sorted = list.OrderBy(delegate (Asset asset)
     {

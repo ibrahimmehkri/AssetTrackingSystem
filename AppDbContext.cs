@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 public class AppDbContext : DbContext
 {
@@ -10,7 +11,7 @@ public class AppDbContext : DbContext
         optionsBuilder
         .UseSqlServer(
             @"Server=localhost\SQLEXPRESS;Database=AssetTrackerDB;Trusted_Connection=True;TrustServerCertificate=True;")
-        .LogTo(Console.WriteLine);
+        .LogTo(Console.WriteLine, LogLevel.Warning);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
