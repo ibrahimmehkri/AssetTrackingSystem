@@ -1,6 +1,5 @@
-abstract class Asset {
-    private static int id = 0; 
-    public int ID { get; }
+public abstract class Asset {
+    public int ID { get; private set; }
     public String Brand { get; set; }
     public String Model { get; set; }
     public DateTime PurchaseDate { get; set; }
@@ -50,16 +49,14 @@ abstract class Asset {
         Model = model;
         PurchaseDate = purchaseDate;
         Office = office;
-        PriceUSD = priceUSD;
-        ID = id; 
-        id++; 
+        PriceUSD = priceUSD; 
     }
 
     public abstract String DisplayType(); 
 
 }
 
-enum Office
+public enum Office
 {
     Sweden = 1,
     USA = 2, 
@@ -68,7 +65,7 @@ enum Office
 
 class Computer : Asset
 {
-    ComputerAsset assetType; 
+    public ComputerAsset assetType { get; set; }
     public Computer(String brand, String model, DateTime purchaseDate, double priceUSD, Office office, ComputerAsset assetType)
         : base(brand, model, purchaseDate, priceUSD, office)
     {
@@ -86,7 +83,7 @@ class Computer : Asset
 
 class Mobile : Asset 
 {
-    MobileAsset assetType; 
+    public MobileAsset assetType { get; set; }
     public Mobile(String brand, String model, DateTime purchaseDate, double priceUSD, Office office, MobileAsset assetType)
         : base(brand, model, purchaseDate, priceUSD, office)
     {
