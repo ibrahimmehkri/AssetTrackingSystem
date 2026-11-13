@@ -61,9 +61,9 @@ abstract class Asset {
 
 enum Office
 {
-    Sweden,
-    USA, 
-    Turkey
+    Sweden = 1,
+    USA = 2, 
+    Turkey = 3
 }
 
 class Computer : Asset

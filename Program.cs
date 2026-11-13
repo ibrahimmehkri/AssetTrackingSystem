@@ -224,7 +224,7 @@ void AddAssets()
             continue;
         }
     
-        Console.Write("Enter Office (Sweden, USA, Turkey): ");
+        Console.Write("Enter Office (1: Sweden, 2: USA, 3: Turkey): ");
         String enteredOffice = Console.ReadLine();
         if (enteredOffice.ToLower().Trim() == "back")
         {
