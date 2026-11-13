@@ -294,37 +294,39 @@ void ShowAssets(List<Asset> list)
         return;
     }
 
-    Console.WriteLine("------------------------------------------------------------------------------------------"); 
-    Console.WriteLine("ID".PadRight(6) + "Office".PadRight(12) + "Type".PadRight(12) + "Brand".PadRight(12) + "Model".PadRight(12) + "Purchase Date".PadRight(16) + "Price".PadRight(12) + "Status");
-    Console.WriteLine("------------------------------------------------------------------------------------------");
+    List<Asset> computers = list
+        .Where(a => a is Computer)
+        .OrderBy(a => a.PurchaseDate)
+        .ToList();
 
-    List<Asset> sorted = list.OrderBy(delegate (Asset asset)
-    {
-        return asset.Office.ToString();  
-    }).ThenBy(delegate(Asset asset)
-    {
-        return asset.PurchaseDate; 
-    }).ToList(); 
+    List<Asset> mobiles = list
+        .Where(a => a is Mobile)
+        .OrderBy(a => a.PurchaseDate)
+        .ToList();
 
-    foreach (Asset asset in sorted)
+    void PrintGroup(string title, List<Asset> group)
     {
-        DateTime eol = asset.EndOfLife(); 
-        var today = DateTime.Today; 
-        
-        if (eol <= today.AddMonths(3))
+        Console.WriteLine(title);
+        Console.WriteLine(new string('-', 72));
+        Console.WriteLine($"{"ID",-5}{"Brand",-12}{"Model",-20}{"Purchase Date",-18}{"Status",-10}");
+        Console.WriteLine(new string('-', 72));
+
+        foreach (Asset asset in group)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+           
+            Console.WriteLine(
+                $"{asset.ID,-5}" +
+                $"{asset.Brand,-12}" +
+                $"{asset.Model,-20}" +
+                $"{asset.PurchaseDate,-18:yyyy-MM-dd}");
         }
-        else if (eol <= today.AddMonths(6))
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-        }
- 
-        String status = Console.ForegroundColor == ConsoleColor.Red || Console.ForegroundColor == ConsoleColor.Yellow ? Console.ForegroundColor.ToString() : "";
-
-        Console.WriteLine(asset.ID.ToString().PadRight(6) + asset.Office.ToString().PadRight(12) + asset.DisplayType().PadRight(12) + asset.Brand.PadRight(12) + asset.Model.PadRight(12) + asset.PurchaseDate.ToString("yyyy-MM-dd").PadRight(16) + (Math.Round(asset.PriceLocal).ToString() + " " + asset.Currency).PadRight(12) + status);
-        Console.ResetColor();
+        Console.WriteLine(); 
     }
+
+    PrintGroup("Computers", computers);
+    PrintGroup("Mobile Devices", mobiles);
+    Console.WriteLine();
+
 }
 
 
