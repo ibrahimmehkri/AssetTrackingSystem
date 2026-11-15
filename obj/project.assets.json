@@ -4345,11 +4345,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Week38MiniProject\\Week38MiniProject.csproj",
+      "projectUniqueName": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Asset-Tracking-System\\Week38MiniProject.csproj",
       "projectName": "Week38MiniProject",
-      "projectPath": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Week38MiniProject\\Week38MiniProject.csproj",
+      "projectPath": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Asset-Tracking-System\\Week38MiniProject.csproj",
       "packagesPath": "C:\\Users\\mehkr\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Week38MiniProject\\obj\\",
+      "outputPath": "C:\\Users\\mehkr\\Documents\\Programming\\C-sharp-projects\\Asset-Tracking-System\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\mehkr\\AppData\\Roaming\\NuGet\\NuGet.Config",

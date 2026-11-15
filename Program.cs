@@ -6,10 +6,10 @@ while (true)
     Console.WriteLine("\n=================================================");
     Console.WriteLine("COMPANY ASSET TRACKING SYSTEM");
     Console.WriteLine("=================================================");
-    Console.WriteLine("\n1. Add Asset\n2. View Assets\n3. Search Assets\n4. Remove Asset\n5. Exit\n");
+    Console.WriteLine("\n1. Add Asset\n2. View Assets\n3. Search Assets\n4. Remove Asset\n5. Update Asset\n6. Exit\n");
     Console.Write("Select option: ");
     String choice = Console.ReadLine();
-    if (choice == "5" || choice.ToLower().Trim() == "q" || choice.ToLower().Trim() == "quit")
+    if (choice == "6" || choice.ToLower().Trim() == "q" || choice.ToLower().Trim() == "quit")
     {
         break;
     }
@@ -32,6 +32,14 @@ while (true)
     else if (choice == "4")
     {
         RemoveAsset(); 
+    }
+    else if(choice == "5")
+    {
+        UpdateAsset(); 
+    }
+    else if(choice == "6")
+    {
+        break; 
     }
     else
     {
@@ -114,18 +122,25 @@ void SearchAssets()
     }
 }
 
-void AddAssets()
+void AddAssets(Asset? existingAsset = null)
 {
     Console.WriteLine("\nEnter back at any prompt to return to the menu.");
-    Console.WriteLine("Press Enter without a value to restart at Asset Type.");
+    if (existingAsset != null)
+    {
+        Console.WriteLine("Press Enter to keep the value that current asset has.");
+    }
     while (true)
     {
-        Console.Write("Enter Asset Type (1: Computer, 2: Mobile): ");
+        String enterAssetType = existingAsset != null ? 
+            $"Current Asset type {existingAsset.GetType().Name}, Enter New Asset Type (1: Computer, 2: Mobile): " : 
+            "Enter Asset Type (1: Computer, 2: Mobile): "; 
+
+        Console.Write(enterAssetType);
         String assetType = Console.ReadLine();
         String subAssetType = ""; 
         if (assetType == String.Empty)
         {
-            continue;
+            ;
         }
         if (assetType.ToLower().Trim() == "back")
         {
@@ -306,6 +321,7 @@ void ShowAssets(List<Asset> list)
 
     void PrintGroup(string title, List<Asset> group)
     {
+
         Console.WriteLine(title);
         Console.WriteLine(new string('-', 72));
         Console.WriteLine($"{"ID",-5}{"Brand",-12}{"Model",-20}{"Purchase Date",-18}{"Status",-10}");
@@ -313,12 +329,36 @@ void ShowAssets(List<Asset> list)
 
         foreach (Asset asset in group)
         {
+
+            // This is where u check the status
+
+            switch (asset.GetStatus())
+            {
+                case Status.EXPIRED:
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    break;
+
+                case Status.RED:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+
+                case Status.YELLOW:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+
+                case Status.NORMAL:
+                    Console.ResetColor();
+                    break;
+            }
            
             Console.WriteLine(
                 $"{asset.ID,-5}" +
                 $"{asset.Brand,-12}" +
                 $"{asset.Model,-20}" +
-                $"{asset.PurchaseDate,-18:yyyy-MM-dd}");
+                $"{asset.PurchaseDate,-18:yyyy-MM-dd}" + 
+                $"{asset.GetStatus(),-10}");
+
+                Console.ResetColor();
         }
         Console.WriteLine(); 
     }
@@ -326,6 +366,166 @@ void ShowAssets(List<Asset> list)
     PrintGroup("Computers", computers);
     PrintGroup("Mobile Devices", mobiles);
     Console.WriteLine();
+
+}
+
+void UpdateAsset()
+{
+    using (var context = new AppDbContext())
+    {
+        List<Asset> list = context.Assets.ToList(); 
+        ShowAssets(list); 
+    }
+
+    while (true)
+    {
+        Console.WriteLine("Please enter an ID from the list above: ");
+        var IDString = Console.ReadLine();
+
+        if(int.TryParse(IDString, out int id))
+        {
+            using (var context = new AppDbContext())
+            {
+                Asset? asset = context.Assets.FirstOrDefault(a => a.ID == id); 
+                if (asset != null)
+                {
+                    Console.WriteLine(new string('-', 72));
+                    Console.WriteLine($"{"ID",-5}{"Brand",-12}{"Model",-20}{"Purchase Date",-18}{"Status",-10}");
+                    Console.WriteLine(new string('-', 72));
+                    Console.WriteLine(
+                        $"{asset.ID,-5}" +
+                        $"{asset.Brand,-12}" +
+                        $"{asset.Model,-20}" +
+                        $"{asset.PurchaseDate,-18:yyyy-MM-dd}" + 
+                        $"{asset.GetStatus(),-10}"); 
+
+                    Console.WriteLine(); 
+
+                    // Push everything down here. 
+                    Console.WriteLine("Leave blank and press enter to keep current values"); 
+                    Console.Write($"Current Brand ({asset.Brand}), Enter Brand: ");
+                    String brand = Console.ReadLine();
+                    if (brand == String.Empty)
+                    {
+                        brand = asset.Brand;
+                    }
+                    if (brand.ToLower().Trim() == "back")
+                    {
+                        break;
+                    }
+                
+                    Console.Write($"Current Model ({asset.Model}), Enter Model: ");
+                    String model = Console.ReadLine();
+                    if (model.ToLower().Trim() == "back")
+                    {
+                        break;
+                    }
+                    if (model == String.Empty)
+                    {
+                        model = asset.Model;
+                    }
+
+                    DateTime purchaseDate = asset.PurchaseDate;
+                    while (true)
+                    {
+                        Console.Write($"Current Purchase date ({asset.PurchaseDate:yyyy-MM-dd}), Enter Purchase Date (yyyy-MM-dd): ");
+                        String date = Console.ReadLine();
+                        if (date.ToLower().Trim() == "back")
+                        {
+                            return;
+                        }
+                        if (date == String.Empty)
+                        {
+                            purchaseDate = asset.PurchaseDate;
+                            break;
+                        }
+                        if (!DateTime.TryParse(date, out purchaseDate))
+                        {
+                            Console.WriteLine("ERROR: Invalid Date");
+                            continue;
+                        }
+                        break;
+                    }
+
+                    double priceUSD = asset.PriceUSD;
+                    while (true)
+                    {
+                        Console.Write($"Current Price ({asset.PriceUSD}), Enter Price (USD): ");
+                        String usd = Console.ReadLine();
+                        if (usd.ToLower().Trim() == "back")
+                        {
+                            return;
+                        }
+                        if (usd == String.Empty)
+                        {
+                            priceUSD = asset.PriceUSD;
+                            break;
+                        }
+                        if (!double.TryParse(usd, out priceUSD) || priceUSD < 0)
+                        {
+                            Console.WriteLine("ERROR: Invalid Price");
+                            continue;
+                        }
+                        break;
+                    }
+
+                    Office office = asset.Office;
+                    while (true)
+                    {
+                        Console.Write($"Current Office ({asset.Office}), Enter Office (1: Sweden, 2: USA, 3: Turkey): ");
+                        String enteredOffice = Console.ReadLine();
+                        if (enteredOffice.ToLower().Trim() == "back")
+                        {
+                            return;
+                        }
+                        if (enteredOffice == String.Empty)
+                        {
+                            office = asset.Office;
+                            break;
+                        }
+                        if (!Enum.TryParse(enteredOffice, true, out office) || !Enum.IsDefined(office))
+                        {
+                            Console.WriteLine("ERROR: Invalid Office");
+                            continue;
+                        }
+                        break;
+                    }
+
+                    asset.Brand = brand; 
+                    asset.Model = model; 
+                    asset.PurchaseDate = purchaseDate; 
+                    asset.Office = office; 
+                    asset.PriceUSD = priceUSD; 
+
+                    context.SaveChanges(); 
+
+                    Asset? savedAsset = context.Assets.FirstOrDefault(a => a.ID == id); 
+                    if (asset != null)
+                    {
+                        Console.WriteLine(); 
+                        Console.WriteLine("Saved as follows: ");
+                        Console.WriteLine(new string('-', 72));
+                        Console.WriteLine($"{"ID",-5}{"Brand",-12}{"Model",-20}{"Purchase Date",-18}{"Status",-10}");
+                        Console.WriteLine(new string('-', 72));
+                        Console.WriteLine(
+                            $"{savedAsset.ID,-5}" +
+                            $"{savedAsset.Brand,-12}" +
+                            $"{savedAsset.Model,-20}" +
+                            $"{savedAsset.PurchaseDate,-18:yyyy-MM-dd}" + 
+                            $"{savedAsset.GetStatus(),-10}"); 
+
+                        Console.WriteLine(); 
+                    }
+                    break; 
+
+                } else
+                {
+                    Console.WriteLine("No such ID exists, try again."); 
+                    continue; 
+                }
+            }
+        }    
+    }
 
 }
 

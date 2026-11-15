@@ -43,6 +43,28 @@ public abstract class Asset {
         return DateTime.Today - PurchaseDate; 
     }
 
+    public Status GetStatus()
+    {
+        Status status; 
+        var eol = EndOfLife(); 
+        if (eol <= DateTime.Today)
+        {
+            status = Status.EXPIRED; 
+        } else if(eol <= DateTime.Today.AddMonths(3))
+        {
+            status = Status.RED; 
+        } else if (eol <= DateTime.Today.AddMonths(6))
+        {
+            status = Status.YELLOW; 
+        } else
+        {
+            status = Status.NORMAL; 
+        }
+
+        return status; 
+
+    }
+
     public Asset (String brand, String model, DateTime purchaseDate, double priceUSD, Office office)
     {
         Brand = brand;
@@ -107,4 +129,9 @@ enum MobileAsset
 {
     Phone, 
     Tablet
+}
+
+public enum Status
+{
+    YELLOW, RED, NORMAL, EXPIRED
 }
