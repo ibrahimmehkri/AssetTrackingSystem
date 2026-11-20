@@ -1,15 +1,16 @@
 // Asset tracking system
 using System.ComponentModel.Design.Serialization;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 while (true)
 {
     Console.WriteLine("\n=================================================");
     Console.WriteLine("COMPANY ASSET TRACKING SYSTEM");
     Console.WriteLine("=================================================");
-    Console.WriteLine("\n1. Add Asset\n2. View Assets\n3. Search Assets\n4. Remove Asset\n5. Update Asset\n6. Exit\n");
+    Console.WriteLine("\n1. Add Asset\n2. View Assets\n3. Search Assets\n4. Remove Asset\n5. Update Asset\n6. Show Report\n7. Exit\n");
     Console.Write("Select option: ");
     String choice = Console.ReadLine();
-    if (choice == "6" || choice.ToLower().Trim() == "q" || choice.ToLower().Trim() == "quit")
+    if (choice == "7" || choice.ToLower().Trim() == "q" || choice.ToLower().Trim() == "quit")
     {
         break;
     }
@@ -39,7 +40,29 @@ while (true)
     }
     else if(choice == "6")
     {
-        break; 
+        while (true)
+        {
+            Console.WriteLine("1. Office Report\n2. Overview Report");
+            var reportChoice = Console.ReadLine();  
+            switch (reportChoice)
+            {
+                case "1": 
+                    OfficeReport();
+                    break;
+                case "2": 
+                    OverviewReport(); 
+                    break; 
+                default: 
+                    Console.WriteLine("Invalid Choice."); 
+                    continue; 
+            }
+
+            break;
+        }
+    }
+    else if(choice == "7")
+    {
+        break;
     }
     else
     {
@@ -528,6 +551,105 @@ void UpdateAsset()
     }
 
 }
+
+void OverviewReport()
+{
+    //Office asset counts 
+    using (var context = new AppDbContext())
+        {
+            List<Asset> list = context.Assets.ToList(); 
+            Dictionary<String, int> officeAssetCounts = new Dictionary<string, int>(); 
+
+            foreach(Office office in Enum.GetValues(typeof(Office)))
+            {
+                int count = list.Count(delegate (Asset asset)
+                {
+                    return asset.Office == office; 
+                });
+
+                officeAssetCounts.Add(office.ToString(), count); 
+            }
+
+            List<Asset> assetsNearingExpiration = list.Where(delegate (Asset asset)
+            {
+                return asset.GetStatus() == Status.RED; 
+            }).ToList(); 
+
+            const string reportHeader = "================ REPORT =================";
+            string sectionDivider = new string('-', reportHeader.Length);
+
+            Console.WriteLine();
+            Console.WriteLine(reportHeader);
+            Console.WriteLine();
+            Console.WriteLine("Office Asset Counts");
+            Console.WriteLine(sectionDivider);
+            foreach (var (office, count) in officeAssetCounts)
+            {
+                string label = $"{office} Office";
+                Console.WriteLine($"{label,-14}: {count,2}");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Assets Near Expiration");
+            Console.WriteLine(sectionDivider);
+            foreach (Asset asset in assetsNearingExpiration)
+            {
+                Console.WriteLine($"{asset.Brand} {asset.Model}");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(new string('=', reportHeader.Length));
+        }
+
+}
+
+void OfficeReport()
+{
+    using (var context = new AppDbContext())
+    {
+        List<Asset> assets = context.Assets.ToList(); 
+        foreach(Office office in Enum.GetValues(typeof(Office)))
+        {
+            List<Asset> officeAssets = assets.Where(delegate (Asset asset)
+            {
+              return asset.Office == office;   
+            }).ToList(); 
+
+            if(officeAssets.Count > 0)
+            {
+                double totalValue = officeAssets.Sum(delegate (Asset asset)
+                {
+                    return asset.PriceUSD;
+                });
+
+                const string rowFormat = "{0,-4}{1,-11}{2,-13}{3,-18}{4}";
+                string header = $"================ {office.ToString().ToUpperInvariant()} OFFICE ================";
+
+                Console.WriteLine();
+                Console.WriteLine(header);
+                Console.WriteLine();
+                Console.WriteLine(rowFormat, "ID", "Asset", "Brand", "Price", "Status");
+                Console.WriteLine(new string('-', 54));
+
+                foreach (Asset asset in officeAssets)
+                {
+                    string assetType = asset is Mobile ? "Mobile" : asset.DisplayType();
+                    string price = $"{asset.PriceUSD:N2} USD";
+                    Console.WriteLine(rowFormat, asset.ID, assetType, asset.Brand, price, asset.GetStatus());
+                }
+
+                Console.WriteLine();
+                Console.WriteLine($"Total Office Value: {totalValue:N2} USD");
+                Console.WriteLine();
+                
+            }
+        }
+    }
+}
+    
+
+    
+
 
 
 
